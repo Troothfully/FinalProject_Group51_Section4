@@ -53,16 +53,21 @@ length = data.shape[0] / samplerate
 print(f"length = {length}s")
 time = np.linspace(0., length, data.shape[0])
 '''
+'''
 Return evenly spaced numbers over a specified interval.
 Returns num evenly spaced samples, calculated over the interval [start, stop].
 The endpoint of the interval can optionally be excluded.
 '''
+'''
 np.linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None,
 axis=0)[source]
 '''Return the shape of an array.'''
+'''
 numpy.shape(a)[source]
 '''
+'''
 To plot data
+'''
 '''
 time = np.linspace(0., length, data.shape[0])
 plt.plot(time, data[:, 0], label="Left channel")
