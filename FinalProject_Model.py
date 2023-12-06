@@ -5,21 +5,30 @@ import matplotlib.pyplot as plt
 import re
 from pydub import AudioSegment
 from scipy.signal import find_peaks
+import os
 
 class File:
   #Initializes the file object and converts .mp3 to .wav if necessary
   def __init__(self, file_name):
-    #if file_name.path.endswith('.wav'):
-    self.file_name = file_name
 
-    #elif file_name.path.endswith('.mp3'):
-      #sound = AudioSegment.from_mp3(file_name)
-      #new_file_name = file_name.split('.')[0] + ".wav"
-      #sound.export(new_file_name, format='wav')
-      #self.file_name = new_file_name
+    def contains_mp3(file_name):
+      return ".mp3" in file_name.lower()
 
-    #else:
-      #raise ValueError(f'Invalid file type (must be .mp3, or .wav: {file_name}')
+    def contains_wav(file_name):
+      return ".wav" in file_name.lower()
+      
+    if contains_mp3(file_name):
+      wav_file = os.path.splitext(file_name)[0] + '.wav'
+      sound = AudioSegment.from_mp3(file_name)
+      sound.export(wav_file, format="wav")
+      self.file_name = wav_file
+
+    elif contains_wav(file_name):
+      self.file_name = file_name
+      
+    else:
+      print(f"{file_name} is neither a MP3 nor a WAV file.")
+      exit()
 
     #Merges Audio Channels
     self.mergeChannels()
@@ -72,7 +81,6 @@ class File:
       else:
           raise ValueError(f'Invalid file type (must be .mp3, .wav, or .flac): {file_name}')
 
-
   #function to merge audio channels
   def mergeChannels(self):
       sound = AudioSegment.from_wav(self.file_name)
@@ -102,3 +110,4 @@ class File:
     plt.show()
 
 userFile = File('16bit2chan.wav')
+print(userFile.resonance_frequency)
