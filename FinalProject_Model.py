@@ -40,8 +40,8 @@ class File:
     self.resonance_frequency = frequencies[peaks[self.highest_peak_index]]
 
     # Find the lowest peak (low frequency)
-    lowest_peak_index = np.argmin(np.abs(fft_result[peaks]))
-    self.low_frequency = frequencies[peaks[lowest_peak_index]]
+    lowest_index = np.argmin(np.abs(fft_result[peaks]))
+    self.low_frequency = frequencies[peaks[lowest_index]]
 
     # Find the peak in the middle of the frequency range
     middle_index = len(frequencies) // 2
