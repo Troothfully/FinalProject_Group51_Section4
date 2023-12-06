@@ -28,6 +28,29 @@ class File:
     self.length = self.data.shape[0] / self.samplerate
     self.time = np.linspace(0., self.length, self.data.shape[0])
 
+    # Perform FFT on the audio data
+    fft_result = np.fft.fft(self.data)
+    frequencies = np.fft.fftfreq(len(fft_result), d=1/self.sample_rate)
+
+    # Find peaks in the frequency domain
+    peaks, _ = find_peaks(np.abs(fft_result))
+
+    # Find the highest peak (resonance frequency)
+    highest_peak_index = np.argmax(np.abs(fft_result[peaks]))
+    self.resonance_frequency = frequencies[peaks[self.highest_peak_index]]
+
+    # Find the lowest peak (low frequency)
+    lowest_peak_index = np.argmin(np.abs(fft_result[peaks]))
+    self.low_frequency = frequencies[peaks[lowest_peak_index]]
+
+    # Find the peak in the middle of the frequency range
+    middle_index = len(frequencies) // 2
+    self.mid_frequency = frequencies[peaks[np.argmin(np.abs(peaks - middle_index))]]
+
+    # Find the peak in the higher range of the frequency spectrum
+    high_index = len(frequencies) // 2  # Consider frequencies above the middle index
+    self.high_frequency = frequencies[peaks[np.argmin(np.abs(peaks - high_index))]]
+
   #Getter function for file_name
   @property
   def file(self):
