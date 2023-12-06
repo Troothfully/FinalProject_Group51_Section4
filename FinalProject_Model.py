@@ -22,16 +22,11 @@ class File:
       
     #Merges Audio Channels
     self.mergeChannels()
-
-
+    
     #Defines variables for Audio Properties
     self.samplerate, self.data = wavfile.read(self.file_name)
-    print(f"number of channels = {self.data.shape[len(self.data.shape) - 1]}")
-    print(f"sample rate = {self.samplerate}Hz")
     self.length = self.data.shape[0] / self.samplerate
-    print(f"length = {self.length}s")
     self.time = np.linspace(0., self.length, self.data.shape[0])
-    print(f"time = {self.time}")
 
   #Getter function for file_name
   @property
@@ -53,10 +48,6 @@ class File:
       else:
           raise ValueError(f'Invalid file type (must be .mp3, .wav, or .flac): {file_name}')
 
-  #function to save file_name to txt file if required
-  def save(self):
-      with open('file_name.txt', 'a') as f:
-          f.write(self.file_name + '\n')
 
   #function to merge audio channels
   def mergeChannels(self):
