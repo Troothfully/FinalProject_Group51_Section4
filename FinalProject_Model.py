@@ -4,28 +4,29 @@ import scipy.io
 import matplotlib.pyplot as plt
 import re
 from pydub import AudioSegment
+from scipy.signal import find_peaks
 
 class File:
   #Initializes the file object and converts .mp3 to .wav if necessary
   def __init__(self, file_name):
-    if file_name.path.endswith('.wav'):
-      self.file_name = file_name
+    #if file_name.path.endswith('.wav'):
+    self.file_name = file_name
 
-    elif file_name.path.endswith('.mp3'):
-      sound = AudioSegment.from_mp3(file_name)
-      new_file_name = file_name.split('.')[0] + ".wav"
-      sound.export(new_file_name, format='wav')
-      self.file_name = new_file_name
+    #elif file_name.path.endswith('.mp3'):
+      #sound = AudioSegment.from_mp3(file_name)
+      #new_file_name = file_name.split('.')[0] + ".wav"
+      #sound.export(new_file_name, format='wav')
+      #self.file_name = new_file_name
 
-    else:
-      raise ValueError(f'Invalid file type (must be .mp3, or .wav: {file_name}')
-      
+    #else:
+      #raise ValueError(f'Invalid file type (must be .mp3, or .wav: {file_name}')
+
     #Merges Audio Channels
     self.mergeChannels()
-    
+
     #Defines variables for Audio Properties
-    self.samplerate, self.data = wavfile.read(self.file_name)
-    self.length = self.data.shape[0] / self.samplerate
+    self.sample_rate, self.data = wavfile.read(self.file_name)
+    self.length = self.data.shape[0] / self.sample_rate
     self.time = np.linspace(0., self.length, self.data.shape[0])
 
     # Perform FFT on the audio data
@@ -37,11 +38,11 @@ class File:
 
     # Find the highest peak (resonance frequency)
     highest_peak_index = np.argmax(np.abs(fft_result[peaks]))
-    self.resonance_frequency = frequencies[peaks[self.highest_peak_index]]
+    self.resonance_frequency = frequencies[peaks[highest_peak_index]]
 
     # Find the lowest peak (low frequency)
-    lowest_index = np.argmin(np.abs(fft_result[peaks]))
-    self.low_frequency = frequencies[peaks[lowest_index]]
+    lowest_peak_index = np.argmin(np.abs(fft_result[peaks]))
+    self.low_frequency = frequencies[peaks[lowest_peak_index]]
 
     # Find the peak in the middle of the frequency range
     middle_index = len(frequencies) // 2
@@ -61,13 +62,13 @@ class File:
   def file(self, file_name):
       if file_name.path.endswith('.wav'):
           self.file_name = file_name
-        
+
       elif file_name.path.endswith('.mp3'):
           sound = AudioSegment.from_mp3(file_name)
           new_file_name = file_name.split('.')[0] + ".wav"
           sound.export(new_file_name, format='wav')
           self.file_name = new_file_name
-        
+
       else:
           raise ValueError(f'Invalid file type (must be .mp3, .wav, or .flac): {file_name}')
 
@@ -88,7 +89,7 @@ class File:
       plt.title('Waveform')
       plt.show()
 
-  
+
   #Function to plot spectrogram (one additional plot assigned)
   def plotSpectrogram(self):
     sample_rate, data = wavfile.read(self.file_name)
@@ -99,3 +100,5 @@ class File:
     plt.ylabel('Frequency (Hz)')
     cbar.set_label('Intensity (dB)')
     plt.show()
+
+userFile = File('16bit2chan.wav')
