@@ -59,7 +59,7 @@ class File:
 
     # Find the peak in the higher range of the frequency spectrum
     high_index = len(frequencies) // 2  # Consider frequencies above the middle index
-    self.high_frequency = frequencies[peaks[np.argmin(np.abs(peaks - high_index))]]
+    self.high_frequency = frequencies[peaks[np.argmax(np.abs(peaks - high_index))]]
 
   #Getter function for file_name
   @property
@@ -110,4 +110,8 @@ class File:
     plt.show()
 
 userFile = File('16bit2chan.wav')
-print(userFile.resonance_frequency)
+userFile.plot()
+userFile.plotSpectrogram()
+print(userFile.low_frequency)
+print(userFile.high_frequency)
+print(userFile.mid_frequency)
