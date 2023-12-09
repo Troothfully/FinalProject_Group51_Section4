@@ -41,6 +41,7 @@ class File:
     # Perform FFT on the audio data
     self.fft_result = abs(np.fft.fft(self.data))
     self.frequencies = abs(np.fft.fftfreq(len(self.fft_result), d=1/self.sample_rate))
+    #defining a variable to trim noise so we only read meaningful data
     self.fft_min = np.max(self.fft_result)*.1
     
     # Find peaks in the frequency domain
