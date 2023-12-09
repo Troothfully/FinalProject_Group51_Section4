@@ -6,59 +6,26 @@ import re
 from pydub import AudioSegment
 from scipy.signal import find_peaks
 import os
+import librosa
 
 class File:
     # Initializes the file object and converts .mp3 to .wav if necessary
     def __init__(self, file_name):
+        self.rt60high = None
+        self.rt60mid = None
+        self.high_frequency = None
+        self.mid_frequency = None
+        self.low_frequency = None
+        self.resonance_frequency = None
+        self.fft_min = None
+        self.frequencies = None
+        self.fft_result = None
+        self.time = None
+        self.length = None
+        self.data = None
+        self.sample_rate = None
+        self.rt60low = None
         self.file_name = file_name
-
-        #def contains_mp3(file_name):
-            #return ".mp3" in file_name.lower()
-
-        #def contains_wav(file_name):
-            #return ".wav" in file_name.lower()
-
-        #if contains_mp3(file_name):
-            #wav_file = os.path.splitext(file_name)[0] + '.wav'
-            #sound = AudioSegment.from_mp3(file_name)
-            #sound.export(wav_file, format="wav")
-            #self.file_name = wav_file
-
-        #elif contains_wav(file_name):
-            #self.file_name = file_name
-
-        #else:
-            #print(f"{file_name} is neither a MP3 nor a WAV file.")
-            #exit()
-
-        # Merges Audio Channels
-        self.mergeChannels()
-
-        # Defines variables for Audio Properties
-        self.sample_rate, self.data = wavfile.read(self.file_name)
-        self.length = self.data.shape[0] / self.sample_rate
-        self.time = np.linspace(0., self.length, self.data.shape[0])
-
-        # Perform FFT on the audio data
-        self.fft_result = abs(np.fft.fft(self.data))
-        self.frequencies = abs(np.fft.fftfreq(len(self.fft_result), d=1 / self.sample_rate))
-        self.fft_min = np.max(self.fft_result) * .1
-
-        # Find peaks in the frequency domain
-        peaks, _ = find_peaks(np.abs(self.fft_result), self.fft_min)
-
-        # Find the highest peak (resonance frequency)
-        highest_peak_index = np.argmax(np.abs(self.fft_result[peaks]))
-        self.resonance_frequency = self.frequencies[peaks[highest_peak_index]]
-
-        # Find the low frequency
-        self.low_frequency = np.min(self.frequencies[peaks])
-
-        # Find the mid frequency
-        self.mid_frequency = np.median(np.abs(self.frequencies[peaks]))
-
-        # Find the high frequency
-        self.high_frequency = np.max(self.frequencies[peaks])
 
     # Getter function for file_name
     @property
@@ -66,8 +33,8 @@ class File:
         return self.file_name
 
     # setter function for file_name
-    @file.setter
-    def file(self, file_name):
+    def fileSet(self, file_name):
+
         def contains_mp3(file_name):
             return ".mp3" in file_name.lower()
 
@@ -79,12 +46,60 @@ class File:
             sound = AudioSegment.from_mp3(file_name)
             sound.export(wav_file, format="wav")
             self.file_name = wav_file
+            # Merges Audio Channels
             self.mergeChannels()
+            # Defines variables for Audio Properties
+            self.sample_rate, self.data = wavfile.read(self.file_name)
+            self.length = self.data.shape[0] / self.sample_rate
+            self.time = np.linspace(0., self.length, self.data.shape[0])
+            # Perform FFT on the audio data
+            self.fft_result = abs(np.fft.fft(self.data))
+            self.frequencies = abs(np.fft.fftfreq(len(self.fft_result), d=1 / self.sample_rate))
+            self.fft_min = np.max(self.fft_result) * .1
+            # Find peaks in the frequency domain
+            peaks, _ = find_peaks(np.abs(self.fft_result), self.fft_min)
+            # Find the highest peak (resonance frequency)
+            highest_peak_index = np.argmax(np.abs(self.fft_result[peaks]))
+            self.resonance_frequency = self.frequencies[peaks[highest_peak_index]]
+            # Find the low frequency
+            self.low_frequency = np.min(self.frequencies[peaks])
+            # Find the mid frequency
+            self.mid_frequency = np.median(np.abs(self.frequencies[peaks]))
+            # Find the high frequency
+            self.high_frequency = np.max(self.frequencies[peaks])
+            # calculate rt60 values
+            self.rt60low = self.calculate_low_freq_rt60()
+            self.rt60mid = self.calculate_mid_freq_rt60()
+            self.rt60high = self.calculate_high_freq_rt60()
+
 
         elif contains_wav(file_name):
             self.file_name = file_name
+            # Merges Audio Channels
             self.mergeChannels()
-
+            # Defines variables for Audio Properties
+            self.sample_rate, self.data = wavfile.read(self.file_name)
+            self.length = self.data.shape[0] / self.sample_rate
+            self.time = np.linspace(0., self.length, self.data.shape[0])
+            # Perform FFT on the audio data
+            self.fft_result = abs(np.fft.fft(self.data))
+            self.frequencies = abs(np.fft.fftfreq(len(self.fft_result), d=1 / self.sample_rate))
+            self.fft_min = np.max(self.fft_result) * .1
+            # Find peaks in the frequency domain
+            peaks, _ = find_peaks(np.abs(self.fft_result), self.fft_min)
+            # Find the highest peak (resonance frequency)
+            highest_peak_index = np.argmax(np.abs(self.fft_result[peaks]))
+            self.resonance_frequency = self.frequencies[peaks[highest_peak_index]]
+            # Find the low frequency
+            self.low_frequency = np.min(self.frequencies[peaks])
+            # Find the mid frequency
+            self.mid_frequency = np.median(np.abs(self.frequencies[peaks]))
+            # Find the high frequency
+            self.high_frequency = np.max(self.frequencies[peaks])
+            #calculate rt60 values
+            self.rt60low = self.calculate_low_freq_rt60()
+            self.rt60mid = self.calculate_mid_freq_rt60()
+            self.rt60high = self.calculate_high_freq_rt60()
         else:
             print(f"{file_name} is neither a MP3 nor a WAV file.")
             exit()
@@ -125,62 +140,74 @@ class File:
         cbar.set_label('Intensity (dB)')
         plt.show()
 
-    def calculate_low_frequency_rt60(self, low_freq_cutoff=125):
-        # Calculate the energy envelope of the audio
-        power = np.cumsum(self.data ** 2)
-
-        # Normalize the energy envelope
-        power /= np.max(power)
-
-        # Apply a low-pass filter to focus on low frequencies
-        low_pass_cutoff = min(low_freq_cutoff, self.sample_rate // 2)
-        low_pass_filter = np.ones(low_pass_cutoff)
-        low_pass_filter /= np.sum(low_pass_filter)
-        low_frequency_envelope = np.convolve(power, low_pass_filter, mode='valid')
-
-        # Find the time it takes for the low-frequency energy to decay by 60 dB
-        rt60_index = np.argmax(low_frequency_envelope < 0.001)
-        rt60 = rt60_index / float(self.sample_rate)
-
+    def calculate_low_freq_rt60(self, low_freq_cutoff=250):
+        # Load the audio file
+        y, sr = librosa.load(self.file_name, sr=None)
+        # Calculate the STFT (Short-Time Fourier Transform)
+        stft = librosa.stft(y)
+        # Calculate the power spectrogram
+        power_spectrogram = np.abs(stft) ** 2
+        # Sum the power spectrogram across frequency bins
+        power_sum = np.sum(power_spectrogram, axis=0)
+        # Calculate the cumulative energy
+        cumulative_energy = np.cumsum(power_sum) / np.sum(power_sum)
+        # Find the index where the cumulative energy exceeds 60%
+        rt60_index = np.argmax(cumulative_energy >= 0.6)
+        # Convert the index to frequency in Hz
+        rt60_freq = librosa.fft_frequencies(sr=sr, n_fft=stft.shape[0])[rt60_index]
+        # Calculate RT60 using the formula: RT60 = 0.049 * N / (f_hi - f_lo)
+        rt60 = 0.049 * stft.shape[1] / (rt60_freq - low_freq_cutoff)
         return rt60
 
-    def calculate_mid_frequency_rt60(self, mid_freq_range=(500, 2000)):
-        # Calculate the energy envelope of the audio
-        power = np.cumsum(self.data ** 2)
-
-        # Normalize the energy envelope
-        power /= np.max(power)
-
-        # Apply a band-pass filter to focus on mid frequencies
-        mid_freq_min, mid_freq_max = mid_freq_range
-        mid_freq_min = max(mid_freq_min, 0)
-        mid_freq_max = min(mid_freq_max, self.sample_rate // 2)
-
-        band_pass_filter = np.zeros_like(power)
-        band_pass_filter[mid_freq_min:mid_freq_max + 1] = 1
-        mid_frequency_envelope = power * band_pass_filter
-
-        # Find the time it takes for the mid-frequency energy to decay by 60 dB
-        rt60_index = np.argmax(mid_frequency_envelope < 0.001)
-        rt60 = rt60_index / float(power)
-
+    def calculate_mid_freq_rt60(self, low_freq_cutoff=250, high_freq_cutoff=5000):
+        # Load the audio file
+        y, sr = librosa.load(self.file_name, sr=None)
+        # Calculate the STFT (Short-Time Fourier Transform)
+        stft = librosa.stft(y)
+        # Calculate the power spectrogram
+        power_spectrogram = np.abs(stft) ** 2
+        # Define frequency bins
+        frequencies = librosa.fft_frequencies(sr=sr, n_fft=stft.shape[0])
+        # Find the indices corresponding to the specified frequency range
+        low_freq_index = np.argmax(frequencies >= low_freq_cutoff)
+        high_freq_index = np.argmax(frequencies >= high_freq_cutoff)
+        # Sum the power spectrogram in the specified frequency range
+        power_sum = np.sum(power_spectrogram[:, low_freq_index:high_freq_index + 1], axis=1)
+        # Calculate the cumulative energy
+        cumulative_energy = np.cumsum(power_sum) / np.sum(power_sum)
+        # Find the index where the cumulative energy exceeds 60%
+        rt60_index = np.argmax(cumulative_energy >= 0.6)
+        # Convert the index to frequency in Hz
+        rt60_freq = frequencies[low_freq_index + rt60_index]
+        # Calculate RT60 using the formula: RT60 = 0.049 * N / (f_hi - f_lo)
+        rt60 = 0.049 * stft.shape[1] / (rt60_freq - low_freq_cutoff)
         return rt60
 
-    def calculate_high_frequency_rt60(self, high_freq_cutoff=5000):
-
-        # Apply a high-pass filter to focus on high frequencies
-        high_pass_cutoff = min(high_freq_cutoff, self.sample_rate // 2)
-        high_pass_filter = np.concatenate([np.zeros(high_pass_cutoff), np.ones(self.sample_rate - high_pass_cutoff)])
-        high_frequency_data = np.convolve(self.data, high_pass_filter, mode='same')
-
-        # Calculate the energy envelope of the high-frequency data
-        energy_envelope = np.cumsum(high_frequency_data ** 2)
-
-        # Normalize the energy envelope
-        energy_envelope /= np.max(energy_envelope)
-
-        # Find the time it takes for the high-frequency energy to decay by 60 dB
-        rt60_index = np.argmax(energy_envelope < 0.001)
-        rt60 = rt60_index / float(self.sample_rate)
-
+    def calculate_high_freq_rt60(self, high_freq_cutoff=5000):
+        # Load the audio file
+        y, sr = librosa.load(self.file_name, sr=None)
+        # Calculate the STFT (Short-Time Fourier Transform)
+        stft = librosa.stft(y)
+        # Calculate the power spectrogram
+        power_spectrogram = np.abs(stft) ** 2
+        # Define frequency bins
+        frequencies = librosa.fft_frequencies(sr=sr, n_fft=stft.shape[0])
+        # Find the index corresponding to the specified high frequency cutoff
+        high_freq_index = np.argmax(frequencies >= high_freq_cutoff)
+        # Sum the power spectrogram in the high-frequency range
+        power_sum = np.sum(power_spectrogram[:, high_freq_index:], axis=1)
+        # Calculate the cumulative energy
+        cumulative_energy = np.cumsum(power_sum) / np.sum(power_sum)
+        # Find the index where the cumulative energy exceeds 60%
+        rt60_index = np.argmax(cumulative_energy >= 0.6)
+        # Convert the index to frequency in Hz
+        rt60_freq = frequencies[high_freq_index + rt60_index]
+        # Calculate RT60 using the formula: RT60 = 0.049 * N / (f_hi - f_lo)
+        rt60 = 0.049 * stft.shape[1] / (rt60_freq - high_freq_cutoff)
         return rt60
+
+userFile = File('SampleFile')
+userFile.fileSet('sample-3s.mp3')
+userFile.plotTimeAmp()
+userFile.plotFFT()
+userFile.plotSpectrogram()
