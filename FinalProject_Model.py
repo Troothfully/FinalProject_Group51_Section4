@@ -39,28 +39,26 @@ class File:
     self.time = np.linspace(0., self.length, self.data.shape[0])
 
     # Perform FFT on the audio data
-    fft_result = np.fft.fft(self.data)
-    frequencies = np.fft.fftfreq(len(fft_result), d=1/self.sample_rate)
-
+    self.fft_result = abs(np.fft.fft(self.data))
+    self.frequencies = abs(np.fft.fftfreq(len(self.fft_result), d=1/self.sample_rate))
+    self.fft_min = np.max(self.fft_result)*.1
+    
     # Find peaks in the frequency domain
-    peaks, _ = find_peaks(np.abs(fft_result))
-
+    peaks, _ = find_peaks(np.abs(self.fft_result), self.fft_min)
+    
     # Find the highest peak (resonance frequency)
-    highest_peak_index = np.argmax(np.abs(fft_result[peaks]))
-    self.resonance_frequency = frequencies[peaks[highest_peak_index]]
+    highest_peak_index = np.argmax(np.abs(self.fft_result[peaks]))
+    self.resonance_frequency = self.frequencies[peaks[highest_peak_index]]
 
-    # Find the lowest peak (low frequency)
-    lowest_peak_index = np.argmin(np.abs(fft_result[peaks]))
-    self.low_frequency = frequencies[peaks[lowest_peak_index]]
-
-    # Find the peak in the middle of the frequency range
-    middle_index = len(frequencies) // 2
-    self.mid_frequency = frequencies[peaks[np.argmin(np.abs(peaks - middle_index))]]
-
-    # Find the peak in the higher range of the frequency spectrum
-    high_index = len(frequencies) // 2  # Consider frequencies above the middle index
-    self.high_frequency = frequencies[peaks[np.argmax(np.abs(peaks - high_index))]]
-
+    # Find the low frequency
+    self.low_frequency = np.min(self.frequencies[peaks])
+    
+    # Find the mid frequency
+    self.mid_frequency = np.median(np.abs(self.frequencies[peaks]))
+    
+    # Find the high frequency
+    self.high_frequency = np.max(self.frequencies[peaks])
+    
   #Getter function for file_name
   @property
   def file(self):
@@ -69,17 +67,25 @@ class File:
   #setter function for file_name
   @file.setter
   def file(self, file_name):
-      if file_name.path.endswith('.wav'):
-          self.file_name = file_name
+    def contains_mp3(file_name):
+      return ".mp3" in file_name.lower()
 
-      elif file_name.path.endswith('.mp3'):
-          sound = AudioSegment.from_mp3(file_name)
-          new_file_name = file_name.split('.')[0] + ".wav"
-          sound.export(new_file_name, format='wav')
-          self.file_name = new_file_name
+    def contains_wav(file_name):
+      return ".wav" in file_name.lower()
 
-      else:
-          raise ValueError(f'Invalid file type (must be .mp3, .wav, or .flac): {file_name}')
+    if contains_mp3(file_name):
+      wav_file = os.path.splitext(file_name)[0] + '.wav'
+      sound = AudioSegment.from_mp3(file_name)
+      sound.export(wav_file, format="wav")
+      self.file_name = wav_file
+
+    elif contains_wav(file_name):
+      self.file_name = file_name
+
+    else:
+      print(f"{file_name} is neither a MP3 nor a WAV file.")
+      exit()
+
 
   #function to merge audio channels
   def mergeChannels(self):
@@ -89,14 +95,22 @@ class File:
       self.file_name = 'mono_channel.wav'
 
   #function to plot waveform of .wav file
-  def plot(self):
+  def plotTimeAmp(self):
       plt.plot(self.time, self.data)
       plt.legend(['Channel 1'])
       plt.xlabel('Time (s)')
       plt.ylabel('Amplitude')
-      plt.title('Waveform')
+      plt.title('Time/Amplitude Waveform')
       plt.show()
 
+  #function to plot waveform of the FFT
+  def plotFFT(self):
+      plt.plot(self.frequencies, self.fft_result)
+      plt.legend(['Channel 1'])
+      plt.xlabel('Frequency (Hz)')
+      plt.ylabel('Amplitude')
+      plt.title('FFT Waveform')
+      plt.show()
 
   #Function to plot spectrogram (one additional plot assigned)
   def plotSpectrogram(self):
@@ -108,10 +122,3 @@ class File:
     plt.ylabel('Frequency (Hz)')
     cbar.set_label('Intensity (dB)')
     plt.show()
-
-userFile = File('16bit2chan.wav')
-userFile.plot()
-userFile.plotSpectrogram()
-print(userFile.low_frequency)
-print(userFile.high_frequency)
-print(userFile.mid_frequency)
