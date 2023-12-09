@@ -17,11 +17,11 @@ class Controller:
 
     def display_rt60_plot_low(self):
         # Assuming the model has methods to compute RT60 for low, mid, and high frequencies
-        low_rt60 = self.model.calculate_low_frequency_rt60()
+        low_rt60 = self.model.calculate_low_freq_rt60()
 
         # Plot RT60 for Low frequencies
         plt.figure()
-        plt.bar(self.model.time, [low_rt60])
+        plt.bar([self.model.time], [low_rt60])
         plt.title('RT60 Low-Freq Plot')
         plt.xlabel('Frequency Band')
         plt.ylabel('RT60 (s)')
@@ -29,11 +29,11 @@ class Controller:
 
     def display_rt60_plot_mid(self):
         # Assuming the model has methods to compute RT60 for low, mid, and high frequencies
-        mid_rt60 = self.model.calculate_mid_rt60()
+        mid_rt60 = self.model.calculate_mid_freq_rt60()
 
         # Plot RT60 for Mid frequencies
         plt.figure()
-        plt.bar(self.model.time, [mid_rt60])
+        plt.bar([self.model.time], [mid_rt60])
         plt.title('RT60 Mid-Freq Plot')
         plt.xlabel('Frequency Band')
         plt.ylabel('RT60 (s)')
@@ -41,11 +41,11 @@ class Controller:
 
     def display_rt60_plot_high(self):
         # Assuming the model has methods to compute RT60 for low, mid, and high frequencies
-        high_rt60 = self.model.calculate_high_rt60()
+        high_rt60 = self.model.calculate_high_freq_rt60()
 
         # Plot RT60 for High frequencies
         plt.figure()
-        plt.bar(self.model.time, [high_rt60])
+        plt.bar([self.model.time], [high_rt60])
         plt.title('RT60 High-Freq Plot')
         plt.xlabel('Frequency Band')
         plt.ylabel('RT60 (s)')
@@ -101,9 +101,9 @@ class Controller:
 
         if contains_mp3(file_name) or contains_wav(file_name):
             #sets file name to new file_name
-            self.model.file(file_name)
+            self.model.fileSet(file_name)
             # show a success message
             self.view.show_success(f'File: {file_name} set!')
         else:
             #show an error message
-            self.view.show_error(f'{file_name} is neither a MP3 nor a WAV file.'
+            self.view.show_error(f'{file_name} is neither a MP3 nor a WAV file.')
