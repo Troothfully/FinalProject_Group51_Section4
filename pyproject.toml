@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "FinalProject_Group51_Section4"
+version = "0.0.1"
+authors = [
+  { name="Christopher Ahlheim", email="cahlheim6926@floridapoly.edu" },
+    { name="Acka Armah", email="aarmah4798@floridapoly.edu" },
+    { name="Lucas Stouffer", email="lstouffer2392@floridapoly.edu" }
+]
+description = "A package to read a mp3 or wav file and provide key information."
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/Troothfully/FinalProject_Group51_Section4/tree/main"
+Issues = "https://github.com/Troothfully/FinalProject_Group51_Section4/issues"
