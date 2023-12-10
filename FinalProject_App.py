@@ -1,6 +1,6 @@
-from model import Model
-from view import View
-from controller import Controller
+from FinalProject_Model import Model
+from FinalProject_View import View
+from FinalProject_Controller import Controller
 import tkinter as tk
 
 class App(tk.Tk):
