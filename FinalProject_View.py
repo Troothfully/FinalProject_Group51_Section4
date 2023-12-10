@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 class View(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -85,3 +84,4 @@ class View(ttk.Frame):
 
     def hide_message(self):
         self.message_label['text'] = ''
+
