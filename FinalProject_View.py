@@ -1,71 +1,87 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import filedialog as fd
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+class View(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
 
+        # create widgets
 
+        #textbox for data
+        self.T = tk.Text(self, height=10, width=52)
+        self.T.grid(row=1,column=0)
+        self.T.configure(state='disabled')
 
-class View(ttk.Frame): # dont know what to call this :(
-    def __init__(self, variable):
-        super().__init__(variable)
+        #tabs for graphs
+        self.tabs = ttk.Notebook(self)
+        self.tab1 = ttk.Frame(self.tabs)
+        self.tab2 = ttk.Frame(self.tabs)
+        self.tab3 = ttk.Frame(self.tabs)
+        self.tab4 = ttk.Frame(self.tabs)
+        self.tab5 = ttk.Frame(self.tabs)
+        self.tab6 = ttk.Frame(self.tabs)
+        self.tab7 = ttk.Frame(self.tabs)
+        #name tabs
+        self.tabs.add(self.tab1, text='Waveform')
+        self.tabs.add(self.tab2, text='Spectrogram')
+        self.tabs.add(self.tab3, text='FFT')
+        self.tabs.add(self.tab4, text='RT60-Low')
+        self.tabs.add(self.tab5, text='RT60-Mid')
+        self.tabs.add(self.tab6, text='RT60-High')
+        self.tabs.add(self.tab7, text='RT60-Combined')
 
+        #locate tabs
+        self.tabs.grid(row=2, column = 0)
 
-        self.label = ttk.Label(self, text = 'Sound file GUI')
-        self.label.grid(row = 1, column = 1)
+        self.data = ttk.Label(self, text='Key Data:')
+        self.data.grid(row=0, column=0, sticky=tk.W)
 
-        #add the button to select the file (file button
-        self.Fbutton = ttk.Button(self, text = 'Open a file', command= select_file())
-        self.Fbutton.grid(row = 2, column = 1)
+        # label
+        self.label = ttk.Label(self, text='File name:')
+        self.label.grid(row=0, column=0, sticky=tk.W)
 
-        #display the time
-        #call a function to dispaly the time
-        self.time = ttk.Label(self, text = time_of())
-        self.time.grid(row = 2, column = 1)
-        #display a chart here
-        #dont know exactly how many charts but this can be duplicated
-        self.charts = ttk.mainframe(self, listvariable = get_chart(), height = 6, width = 30)
-        self.charts.grid(row=3, column=1)
+        #file entry
+        self.file_var = tk.StringVar()
+        self.file_entry = ttk.Entry(self, textvariable=self.file_var, width=30)
+        self.file_entry.grid(row=0, column=0, sticky=tk.W, padx=65)
 
-        self.Morecharts = ttk.mainframe(self, listvariable=get_chart(), height=6, width=30)
-        self.Morecharts.grid(row=4, column=1)
+        # laf button
+        self.laf_button = ttk.Button(self, text='Load Audio File', command=self.laf_button_clicked)
+        self.laf_button.grid(row=0, column=0, sticky=tk.E)
 
+        # message
+        self.message_label = ttk.Label(self, text='', foreground='red')
+        self.message_label.grid(row=5, column=0, sticky=tk.S)
 
-        #place holders
-        self.changeButton = ttk.Button(self, text = 'High Med or Low', command= get_chart())
-        self.changeButton.grid(row = 5, column = 1)
-
-
-
-
-#this can be formated easily
+        # set the controller
+        self.controller = None
 
     def set_controller(self, controller):
+        """
+        Set the controller
+        :param controller:
+        :return:
+        """
         self.controller = controller
 
+    def laf_button_clicked(self):
+        if self.controller:
+            self.controller.laf(self.file_var.get())
 
+    def show_error(self, message):
+        self.message_label['text'] = message
+        self.message_label['foreground'] = 'red'
+        self.message_label.after(3000, self.hide_message)
+        self.file_entry['foreground'] = 'red'
 
+    def show_success(self, message):
+        self.message_label['text'] = message
+        self.message_label['foreground'] = 'green'
+        self.message_label.after(10000, self.hide_message)
 
+        # reset the form
+        self.file_entry['foreground'] = 'black'
+        self.file_var.set('')
 
-
-def select_file():
-    filetypes = (
-        ('sound files', '*.wav'),
-    )
-
-    filename = fd.askopenfilename(
-        title='Open a sound file',
-        initialdir='/',
-        filetypes=filetypes)
-
-    gfile = filename
-
-
-
-
-
-#place holder functions
-def time_of():
-    return 0
-
-
-def get_chart():
-    return 0
+    def hide_message(self):
+        self.message_label['text'] = ''
