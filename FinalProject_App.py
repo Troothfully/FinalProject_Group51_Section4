@@ -2,7 +2,7 @@ from model import Model
 from view import View
 from controller import Controller
 import tkinter as tk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
