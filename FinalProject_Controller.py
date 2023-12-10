@@ -1,5 +1,5 @@
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.pyplot as plt
+
 class Controller:
     def __init__(self, model, view):
         self.model = model
@@ -12,6 +12,37 @@ class Controller:
             # laf function from the model
             self.model.file = file
             self.model.laf()
+
+            figFFT = self.model.plotFFT()
+            chart = FigureCanvasTkAgg(figFFT, self.view.tab3)
+            chart.get_tk_widget().grid(row=0, column=0)
+
+            figWave = self.model.plotTimeAmp()
+            chart = FigureCanvasTkAgg(figWave, self.view.tab1)
+            chart.get_tk_widget().grid(row=0, column=0)
+
+            figSpec = self.model.plotSpectrogram()
+            chart = FigureCanvasTkAgg(figSpec, self.view.tab2)
+            chart.get_tk_widget().grid(row=0, column=0)
+
+            figRT60mid = self.model.plotRT60mid()
+            chart = FigureCanvasTkAgg(figRT60mid, self.view.tab5)
+            chart.get_tk_widget().grid(row=0, column=0)
+
+            figRT60low = self.model.plotRT60low()
+            chart = FigureCanvasTkAgg(figRT60low, self.view.tab4)
+            chart.get_tk_widget().grid(row=0, column=0)
+
+            figRT60high = self.model.plotRT60high()
+            chart = FigureCanvasTkAgg(figRT60high, self.view.tab6)
+            chart.get_tk_widget().grid(row=0, column=0)
+
+            figRT60combined = self.model.plotRT60Combined()
+            chart = FigureCanvasTkAgg(figRT60combined, self.view.tab7)
+            chart.get_tk_widget().grid(row=0, column=0)
+
+
+
 
             # show a success message
             self.view.show_success(f'The file {file} has been saved as mono_channel.wav!')
@@ -27,17 +58,7 @@ class Controller:
             self.view.T.insert('8.0', f'{round(self.model.length,4)} seconds is the length of the sound file.\n')
             self.view.T.configure(state='disabled')
 
-            figFFT = self.model.plotFFT()
-            chart = FigureCanvasTkAgg(figFFT,self.view.tab3)
-            chart.get_tk_widget().grid(row=0,column=0)
 
-            figWave = self.model.plotTimeAmp()
-            chart = FigureCanvasTkAgg(figWave, self.view.tab1)
-            chart.get_tk_widget().grid(row=0, column=0)
-
-            figSpec = self.model.plotSpectrogram()
-            chart = FigureCanvasTkAgg(figSpec, self.view.tab2)
-            chart.get_tk_widget().grid(row=0, column=0)
 
 
         except ValueError as error:
